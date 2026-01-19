@@ -1,6 +1,11 @@
 <Solution>
-  <Project Path="BlogPortfolio.API/BlogPortfolio.API.csproj" />
-  <Project Path="BlogPortfolio.Application/BlogPortfolio.Application.csproj" />
-  <Project Path="BlogPortfolio.Domain/BlogPortfolio.Domain.csproj" />
-  <Project Path="BlogPortfolio.Infrastructure/BlogPortfolio.Infrastructure.csproj" />
+  <Folder Name="/src/">
+    <Project Path="BlogPortfolio.API/BlogPortfolio.API.csproj" />
+    <Project Path="BlogPortfolio.Application/BlogPortfolio.Application.csproj" />
+    <Project Path="BlogPortfolio.Domain/BlogPortfolio.Domain.csproj" />
+    <Project Path="BlogPortfolio.Infrastructure/BlogPortfolio.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="BlogPortfolio.Domain.Tests/BlogPortfolio.Domain.Tests.csproj" Id="5d85337c-a052-4d93-a8f2-e21450eee632" />
+  </Folder>
 </Solution>
