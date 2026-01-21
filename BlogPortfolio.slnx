@@ -6,7 +6,7 @@
     <Project Path="src/BlogPortfolio.Infrastructure/BlogPortfolio.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="BlogPortifolio.Application.Tests/BlogPortifolio.Application.Tests.csproj" Id="9a9a2966-7e99-44bf-9814-ac7539d2b17f" />
     <Project Path="tests/BlogPortfolio.Domain.Tests/BlogPortfolio.Domain.Tests.csproj" />
+    <Project Path="tests/BlogPortifolio.Application.Tests/BlogPortifolio.Application.Tests.csproj" />
   </Folder>
 </Solution>
