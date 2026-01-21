@@ -1,6 +1,6 @@
 ﻿using BlogPortfolio.Application.Common.Interfaces;
 using BlogPortfolio.Application.Common.Results;
-using FluentValidation;
+using BlogPortfolio.Domain.Entities;
 
 namespace BlogPortfolio.Application.Posts.Commands.CreateDraftPost
 {
@@ -8,37 +8,36 @@ namespace BlogPortfolio.Application.Posts.Commands.CreateDraftPost
     {
         private readonly IPostRepository _postRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IValidator<CreateDraftPostCommand> _validator;
 
         public CreateDraftPostCommandHandler(
             IPostRepository postRepository,
-            IUserRepository userRepository,
-            IValidator<CreateDraftPostCommand> validator)
+            IUserRepository userRepository)
         {
             _postRepository = postRepository;
             _userRepository = userRepository;
-            _validator = validator;
         }
 
         public async Task<Result<Guid>> Handle(CreateDraftPostCommand command)
         {
-            var validationResult = await _validator.ValidateAsync(command);
+            if (command.OwnerId == Guid.Empty)
+                return Result<Guid>.Failure("Owner is required");
 
-            if (!validationResult.IsValid)
-            {
-                return Result<Guid>.Failure(validationResult.Errors[0].ErrorMessage);
-            }
+            var user = await _userRepository.GetByIdAsync(command.OwnerId);
 
-            var owner = await _userRepository.GetByIdAsync(command.OwnerId);
-            
-            if (owner is null)
+            if (user is null)
                 return Result<Guid>.Failure("User not found");
 
-            var post = Post.CreateDraft(owner.Id);
+            var postResult = Post.CreateDraft(command.OwnerId);
+
+            if (postResult.IsFailure)
+                return Result<Guid>.Failure(postResult.Error);
+
+            var post = postResult.Value!;
 
             await _postRepository.AddAsync(post);
 
             return Result<Guid>.Success(post.Id);
         }
+
     }
 }

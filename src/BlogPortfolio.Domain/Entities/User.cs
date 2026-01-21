@@ -11,7 +11,11 @@ namespace BlogPortfolio.Domain.Entities
         public string Password { get; private set; }
         public UserRole Role { get; private set; }
 
-        public User(string name, string email, string password, UserRole role = UserRole.User)
+        public User(
+            string name,
+            string email,
+            string password,
+            UserRole role = UserRole.User)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new DomainException("Name is required");

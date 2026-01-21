@@ -1,46 +1,68 @@
-﻿using BlogPortfolio.Domain.Common;
+﻿using BlogPortfolio.Application.Common.Results;
 using BlogPortfolio.Domain.Enums;
 
-public class Post
+namespace BlogPortfolio.Domain.Entities
 {
-    public Guid Id { get; private set; }
-    public string? Title { get; private set; }
-    public string? Content { get; private set; }
-    public PostStatus Status { get; private set; }
-    public Guid OwnerId { get; private set; }
-
-    private Post(Guid ownerId)
+    public class Post
     {
-        Id = Guid.NewGuid();
-        OwnerId = ownerId;
-        Status = PostStatus.Draft;
-    }
+        public Guid Id { get; private set; }
+        public string? Title { get; private set; }
+        public string? Content { get; private set; }
+        public PostStatus Status { get; private set; }
+        public Guid OwnerId { get; private set; }
 
-    public static Post CreateDraft(Guid ownerId)
-        => new(ownerId);
+        private Post(Guid ownerId)
+        {
+            Id = Guid.NewGuid();
+            OwnerId = ownerId;
+            Status = PostStatus.Draft;
+        }
 
-    public void UpdateContent(string title, string content)
-    {
-        if (Status != PostStatus.Draft)
-            throw new DomainException("Only draft posts can be edited");
+        public static Result<Post> CreateDraft(Guid ownerId)
+        {
+            if (ownerId == Guid.Empty)
+                return Result<Post>.Failure("Owner is required");
 
-        Title = title;
-        Content = content;
-    }
+            var post = new Post(ownerId);
 
-    public void Publish()
-    {
-        if (string.IsNullOrWhiteSpace(Title))
-            throw new DomainException("Title is required");
+            return Result<Post>.Success(post);
+        }
 
-        if (string.IsNullOrWhiteSpace(Content))
-            throw new DomainException("Content is required");
+        public Result UpdateContent(string title, string content)
+        {
+            if (Status != PostStatus.Draft)
+                return Result.Failure("Only draft posts can be edited");
 
-        Status = PostStatus.Published;
-    }
+            Title = title;
+            Content = content;
 
-    public void Archive()
-    {
-        Status = PostStatus.Archived;
+            return Result.Success();
+        }
+
+        public Result Publish()
+        {
+            if (Status != PostStatus.Draft)
+                return Result.Failure("Only draft posts can be published");
+
+            if (string.IsNullOrWhiteSpace(Title))
+                return Result.Failure("Title is required");
+
+            if (string.IsNullOrWhiteSpace(Content))
+                return Result.Failure("Content is required");
+
+            Status = PostStatus.Published;
+
+            return Result.Success();
+        }
+
+        public Result Archive()
+        {
+            if (Status != PostStatus.Published)
+                return Result.Failure("Only published posts can be archived");
+
+            Status = PostStatus.Archived;
+
+            return Result.Success();
+        }
     }
 }
