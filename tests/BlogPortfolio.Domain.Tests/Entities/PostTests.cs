@@ -1,4 +1,4 @@
-﻿using BlogPortfolio.Domain.Common;
+﻿using BlogPortfolio.Domain.Entities;
 using BlogPortfolio.Domain.Enums;
 using FluentAssertions;
 
@@ -11,50 +11,51 @@ namespace BlogPortfolio.Domain.Tests.Entities
         {
             var ownerId = Guid.NewGuid();
 
-            var post = Post.CreateDraft(ownerId);
+            var result = Post.CreateDraft(ownerId);
 
-            post.Status.Should().Be(PostStatus.Draft);
+            result.IsSuccess.Should().BeTrue();
+            result.Value!.Status.Should().Be(PostStatus.Draft);
         }
 
         [Fact]
-        public void Publishing_Post_Without_Title_Should_Throw_Exception()
+        public void Publishing_Post_Without_Title_Should_Fail()
         {
             var ownerId = Guid.NewGuid();
+            var post = Post.CreateDraft(ownerId).Value!;
 
-            var post = Post.CreateDraft(ownerId);
             post.UpdateContent("", "");
 
-            Action act = () => post.Publish();
+            var result = post.Publish();
 
-            act.Should()
-               .Throw<DomainException>()
-               .WithMessage("Title is required");
+            result.IsSuccess.Should().BeFalse();
+            result.Error.Should().Be("Title is required");
         }
 
         [Fact]
-        public void Publishing_Post_Without_Content_Should_Throw_Exception()
+        public void Publishing_Post_Without_Content_Should_Fail()
         {
             var ownerId = Guid.NewGuid();
+            var post = Post.CreateDraft(ownerId).Value!;
 
-            var post = Post.CreateDraft(ownerId);
             post.UpdateContent("Cool Title", "");
 
-            Action act = () => post.Publish();
+            var result = post.Publish();
 
-            act.Should()
-               .Throw<DomainException>()
-               .WithMessage("Content is required");
+            result.IsSuccess.Should().BeFalse();
+            result.Error.Should().Be("Content is required");
         }
 
         [Fact]
         public void Publishing_Valid_Post_Should_Change_Status_To_Published()
         {
             var ownerId = Guid.NewGuid();
+            var post = Post.CreateDraft(ownerId).Value!;
 
-            var post = Post.CreateDraft(ownerId);
             post.UpdateContent("Cool Title", "Cool Content");
-            post.Publish();
 
+            var result = post.Publish();
+
+            result.IsSuccess.Should().BeTrue();
             post.Status.Should().Be(PostStatus.Published);
         }
 
@@ -62,30 +63,30 @@ namespace BlogPortfolio.Domain.Tests.Entities
         public void Published_Post_Should_Not_Be_Updated()
         {
             var ownerId = Guid.NewGuid();
+            var post = Post.CreateDraft(ownerId).Value!;
 
-            var post = Post.CreateDraft(ownerId);
             post.UpdateContent("Cool Title", "Cool Content");
             post.Publish();
 
-            Action act = () => post.UpdateContent("New Cool Title", "New Cool Content");
+            var result = post.UpdateContent("New Title", "New Content");
 
-            act.Should()
-               .Throw<DomainException>()
-               .WithMessage("Only draft posts can be edited");
+            result.IsSuccess.Should().BeFalse();
+            result.Error.Should().Be("Only draft posts can be edited");
         }
 
         [Fact]
         public void Archiving_Post_Should_Change_Status_To_Archived()
         {
             var ownerId = Guid.NewGuid();
+            var post = Post.CreateDraft(ownerId).Value!;
 
-            var post = Post.CreateDraft(ownerId);
             post.UpdateContent("Cool Title", "Cool Content");
             post.Publish();
-            post.Archive();
 
+            var result = post.Archive();
+
+            result.IsSuccess.Should().BeTrue();
             post.Status.Should().Be(PostStatus.Archived);
         }
-
     }
 }
